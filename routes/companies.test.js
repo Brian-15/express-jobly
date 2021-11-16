@@ -5,6 +5,8 @@ const request = require("supertest");
 const db = require("../db");
 const app = require("../app");
 
+jest.useFakeTimers('legacy');
+
 const {
   commonBeforeAll,
   commonBeforeEach,
@@ -24,8 +26,8 @@ describe("POST /companies", function () {
   const newCompany = {
     handle: "new",
     name: "New",
-    logoUrl: "http://new.img",
     description: "DescNew",
+    logoUrl: "http://new.img",
     numEmployees: 10,
   };
 
@@ -95,6 +97,16 @@ describe("GET /companies", function () {
           ],
     });
   });
+
+  // test("works: gets two companies with \"c\" in their name", async function () {
+  //   const resp = await request(app)
+  //     .get("/companies?minEmployees=1&maxEmployees=2&nameLike=c");
+  //   const c1 = await request(app).get("/companies/c1");
+  //   const c2 = await request(app).get("/companies/c2");
+
+  //   expect(resp.statusCode).toBe(200);
+  //   expect(resp.body).toBe({companies: [ c1.body.company, c2.body.company ]});
+  // });
 
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---

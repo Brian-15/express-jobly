@@ -25,4 +25,25 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
+function sqlForSelectFilters(filters) {
+  if (!filters || Object.keys(filters).length === 0) return "";
+  
+  const filterStrings = [];
+
+  if (filters["nameLike"]) {
+    filterStrings.push(`name ILIKE '%${filters["nameLike"]}%'`);
+  }
+
+  if (filters["maxEmployees"]) {
+    filterStrings.push(`num_employees <= ${filters["maxEmployees"]}`);
+  }
+
+  if (filters["minEmployees"]) {
+    filterStrings.push(`num_employees >= ${filters["minEmployees"]}`);
+  }
+  console.log(filterStrings);
+  
+  return ` WHERE ${filterStrings.join(" AND ")} `;
+}
+
+module.exports = { sqlForPartialUpdate, sqlForSelectFilters };
