@@ -57,8 +57,8 @@ class Job {
                   equity,
                   company_handle AS "companyHandle"
            FROM jobs
-           ORDER BY title
-           ${filterString}`);
+           ${filterString}
+           ORDER BY title`);
     return jobsRes.rows;
   }
 

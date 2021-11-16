@@ -59,9 +59,50 @@ describe("create", function () {
 /************************************** findAll */
 
 describe("findAll", function () {
-  test("works", async function () {
-    let jobs = await Job.findAll();
-    expect(jobs.length).toBe(3);
+  test("works: without filters", async function () {
+    const jobs = await Job.findAll();
+    expect(jobs.length).toBe(4);
+  });
+
+  describe("works: with filters", function () {
+    test("all filters", async function () {
+      const jobs = await Job.findAll({
+        title: "j1",
+        minSalary: 49000,
+        hasEquity: true
+      });
+      expect(jobs.length).toBe(1);
+      expect(jobs[0].title).toEqual("j1");
+    });
+
+    test("only title", async function () {
+      const jobs = await Job.findAll({ title: "j2" });
+      expect(jobs.length).toBe(1);
+      expect(jobs[0].title).toEqual("j2");
+    });
+
+    test("only minSalary", async function () {
+      const jobs = await Job.findAll({ minSalary: 45000 });
+      expect(jobs.length).toBe(3);
+    });
+
+    test("only hasEquity as true", async function () {
+      const jobs = await Job.findAll({ hasEquity: true });
+      expect(jobs.length).toBe(3);
+    });
+
+    test("only hasEquity as false", async function () {
+      const jobs = await Job.findAll({ hasEquity: false });
+      expect(jobs.length).toBe(1);
+    });
+
+    test("some filters", async function () {
+      const jobs = await Job.findAll({
+        minSalary: 49000,
+        hasEquity: true
+      });
+      expect(jobs.length).toBe(3);
+    });
   });
 });
 

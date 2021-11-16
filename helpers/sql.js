@@ -56,7 +56,7 @@ function sqlForJobFilters(filters) {
     filterStrings.push(`title ILIKE '%${title}%'`);
   }
 
-  if ("minSalary") {
+  if (minSalary) {
     filterStrings.push(`salary >= ${minSalary}`);
   }
 
