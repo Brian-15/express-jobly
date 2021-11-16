@@ -11,7 +11,7 @@ class Job {
    *
    * data should be { title, salary, equity, companyHandle }
    *
-   * Returns { handle, name, description, numEmployees, logoUrl }
+   * Returns { title, salary, equity, companyHandle }
    *
    * Throws BadRequestError if company already in database.
    * */
@@ -45,17 +45,20 @@ class Job {
 
   /** Find all jobs.
    *
+   * Can be filtered by { title, minSalary, hasEquity }
    * Returns [{ title, salary, equity, companyHandle }, ...]
    * */
 
-  static async findAll() {
+  static async findAll(filters) {
+    const filterString = sqlForJobFilters(filters);
     const jobsRes = await db.query(
           `SELECT title,
                   salary,
                   equity,
                   company_handle AS "companyHandle"
            FROM jobs
-           ORDER BY title`);
+           ORDER BY title
+           ${filterString}`);
     return jobsRes.rows;
   }
 
@@ -63,20 +66,18 @@ class Job {
    *
    * Returns { title, salary, equity, companyHandle }
    * 
-   * Can be filtered by { title, minSalary, hasEquity }
    *
    * Throws NotFoundError if not found.
    **/
 
-  static async get(id, filters) {
-    const filterString = sqlForJobFilters(filters);
+  static async get(id) {
     const jobRes = await db.query(
         `SELECT title,
                 salary,
                 equity,
                 company_handle AS "companyHandle"
          FROM jobs
-         WHERE id = $1${filterString}`,
+         WHERE id = $1`,
         [id]);
 
     const job = jobRes.rows[0];

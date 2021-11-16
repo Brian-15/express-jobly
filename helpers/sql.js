@@ -67,7 +67,7 @@ function sqlForJobFilters(filters) {
     filterStrings.push("equity = 0");
   }
   
-  return ` AND ${filterStrings.join(" AND ")} `;
+  return ` WHERE ${filterStrings.join(" AND ")} `;
 }
 
 module.exports = { sqlForPartialUpdate, sqlForJobFilters, sqlForCompanyFilters };
