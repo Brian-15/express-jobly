@@ -2,14 +2,14 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate, sqlForSelectFilters } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlForJobFilters } = require("../helpers/sql");
 
-/** Related functions for companies. */
+/** Related functions for jobs. */
 
 class Job {
   /** Create a job (from data), update db, return new company data.
    *
-   * data should be { handle, name, description, numEmployees, logoUrl }
+   * data should be { title, salary, equity, companyHandle }
    *
    * Returns { handle, name, description, numEmployees, logoUrl }
    *
@@ -62,18 +62,21 @@ class Job {
   /** Given a job id, return data about job.
    *
    * Returns { title, salary, equity, companyHandle }
+   * 
+   * Can be filtered by { title, minSalary, hasEquity }
    *
    * Throws NotFoundError if not found.
    **/
 
-  static async get(id) {
+  static async get(id, filters) {
+    const filterString = sqlForJobFilters(filters);
     const jobRes = await db.query(
         `SELECT title,
                 salary,
                 equity,
                 company_handle AS "companyHandle"
          FROM jobs
-         WHERE id = $1`,
+         WHERE id = $1${filterString}`,
         [id]);
 
     const job = jobRes.rows[0];

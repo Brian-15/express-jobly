@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate, sqlForSelectFilters } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlForCompanyFilters } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -50,7 +50,7 @@ class Company {
    * */
 
   static async findAll(filters) {
-    const filterString = sqlForSelectFilters(filters);
+    const filterString = sqlForCompanyFilters(filters);
     const companiesRes = await db.query(
           `SELECT handle,
                   name,

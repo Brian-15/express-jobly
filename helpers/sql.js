@@ -25,25 +25,49 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-function sqlForSelectFilters(filters) {
+function sqlForCompanyFilters(filters) {
   if (!filters || Object.keys(filters).length === 0) return "";
   
+  const { nameLike, maxEmployees, minEmployees } = filters;
   const filterStrings = [];
 
-  if (filters["nameLike"]) {
-    filterStrings.push(`name ILIKE '%${filters["nameLike"]}%'`);
+  if (nameLike) {
+    filterStrings.push(`name ILIKE '%${nameLike}%'`);
   }
 
-  if (filters["maxEmployees"]) {
-    filterStrings.push(`num_employees <= ${filters["maxEmployees"]}`);
+  if (maxEmployees) {
+    filterStrings.push(`num_employees <= ${maxEmployees}`);
   }
 
-  if (filters["minEmployees"]) {
-    filterStrings.push(`num_employees >= ${filters["minEmployees"]}`);
+  if (minEmployees) {
+    filterStrings.push(`num_employees >= ${minEmployees}`);
   }
-  console.log(filterStrings);
   
   return ` WHERE ${filterStrings.join(" AND ")} `;
 }
 
-module.exports = { sqlForPartialUpdate, sqlForSelectFilters };
+function sqlForJobFilters(filters) {
+  if (!filters || Object.keys(filters).length === 0) return "";
+  
+  const { title, minSalary, hasEquity } = filters;
+  const filterStrings = [];
+
+  if (title) {
+    filterStrings.push(`title ILIKE '%${title}%'`);
+  }
+
+  if ("minSalary") {
+    filterStrings.push(`salary >= ${minSalary}`);
+  }
+
+  if (hasEquity === true) {
+    filterStrings.push("equity > 0");
+  }
+  else if (hasEquity === false) {
+    filterStrings.push("equity = 0");
+  }
+  
+  return ` AND ${filterStrings.join(" AND ")} `;
+}
+
+module.exports = { sqlForPartialUpdate, sqlForJobFilters, sqlForCompanyFilters };
