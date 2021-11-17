@@ -131,6 +131,29 @@ describe("get", function () {
   });
 });
 
+/************************************** getByCompany */
+
+describe("getByCompany", function () {
+  test("works", async function () {
+    const jobsQuery = await db.query(
+      `SELECT title, salary, equity, 
+         company_handle AS "companyHandle"
+       FROM jobs
+       WHERE company_handle = 'c1'`);
+    const jobs = await Job.getByCompany("c1");
+    expect(jobs).toEqual(jobsQuery.rows);
+  });
+
+  test("not found if no such job", async function () {
+    try {
+      await Job.get(0);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
 /************************************** update */
 
 describe("update", function () {
