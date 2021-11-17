@@ -108,15 +108,22 @@ describe("GET /companies", function () {
     });
   });
 
-  // test("works: gets two companies with \"c\" in their name", async function () {
-  //   const resp = await request(app)
-  //     .get("/companies?minEmployees=1&maxEmployees=2&nameLike=c");
-  //   const c1 = await request(app).get("/companies/c1");
-  //   const c2 = await request(app).get("/companies/c2");
+  test("works: gets two companies with \"c\" in their name", async function () {
+    const params = {
+      minEmployees: 1,
+      maxEmployees: 2,
+      nameLike: "c"
+    };
+    const resp = await request(app)
+      .get("/companies?")
+      .query(params);
+      
+    const c1 = await request(app).get("/companies/c1");
+    const c2 = await request(app).get("/companies/c2");
 
-  //   expect(resp.statusCode).toBe(200);
-  //   expect(resp.body).toBe({companies: [ c1.body.company, c2.body.company ]});
-  // });
+    // expect(resp.statusCode).toBe(200);
+    expect(resp.body).toEqual({companies: [ c1.body.company, c2.body.company ]});
+  });
 
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---

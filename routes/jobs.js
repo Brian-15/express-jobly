@@ -53,12 +53,15 @@ router.post("/", ensureIsAdmin, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.query, jobFilterSchema);
+    const filters = req.query;
+    if (filters.minSalary) {
+      filters.minSalary = (+filters.minSalary);
+    };
+    const validator = jsonschema.validate(filters, jobFilterSchema);
     if (!validator.valid) {
       const errs = validator.errors.map(e => e.stack);
       throw new BadRequestError(errs);
     }
-    const filters = req.query;
     const jobs = await Job.findAll(filters);
     return res.json({ jobs });
   } catch (err) {
