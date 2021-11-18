@@ -96,6 +96,37 @@ class User {
     return user;
   }
 
+  /** Apply to job for user.
+   *
+   * returns true if successful
+   *
+   * Throws BadRequestError on duplicates.
+   **/
+
+  static async apply(username, jobId) {
+    // Check that username exists
+    const userResult = await db.query(
+      `SELECT username FROM users WHERE username=$1`,
+      [username]);
+    
+    if (userResult.rows.length === 0) throw new NotFoundError();
+
+    // Check that job exists
+    const jobResult = await db.query(
+      `SELECT id FROM jobs WHERE id=$1`,
+      [jobId]);
+    
+    if (jobResult.rows.length === 0) throw new NotFoundError();
+
+    const result = await db.query(
+      `INSERT INTO applications(username, job_id)
+       VALUES ($1, $2)
+       RETURNING job_id AS "jobId"`,
+      [username, jobId]);
+
+    return result.rows[0].jobId;
+  }
+
   /** Find all users.
    *
    * Returns [{ username, first_name, last_name, email, is_admin }, ...]

@@ -105,6 +105,36 @@ describe("register", function () {
   });
 });
 
+/************************************** apply */
+
+describe("apply", function () {
+  test("works", async function () {
+    const jobRes = await db.query(`SELECT id FROM jobs WHERE title='j1'`);
+    const { id } = jobRes.rows[0];
+    const result = await User.apply("u1", id);
+    expect(result).toBe(id);
+  });
+
+  test("fails: invalid jobId", async function () {
+    try {
+      await User.apply("u1", 0);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("fails: invalid username", async function () {
+    try {
+      await User.apply("DNE", 1);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError);
+    }
+  });
+
+});
+
 /************************************** findAll */
 
 describe("findAll", function () {

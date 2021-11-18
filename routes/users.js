@@ -6,14 +6,13 @@ const jsonschema = require("jsonschema");
 
 const express = require("express");
 const { ensureLoggedIn, ensureIsAdmin } = require("../middleware/auth");
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, UnauthorizedError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
 
 const router = express.Router();
-
 
 /** POST / { user }  => { user, token }
  *
@@ -43,6 +42,25 @@ router.post("/", ensureIsAdmin, async function (req, res, next) {
   }
 });
 
+/** POST /[username]/jobs/[id]  =>  { applied: jobId }
+ *
+ * allows that user to apply for a job (or an admin to do it for them). 
+ * 
+ * Authorization required: login user or admin
+ **/
+
+ router.post("/:username/jobs/:id", ensureLoggedIn, async function (req, res, next) {
+  try {
+    const { username, id } = req.params;
+    if (res.locals.user.username != username && !res.locals.user.isAdmin) {
+      throw new UnauthorizedError();
+    }
+    await User.apply(username, id);
+    return res.status(201).json({ applied: parseInt(id) });
+  } catch (err) {
+    return next(err);
+  }
+});
 
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
  *
@@ -76,7 +94,6 @@ router.get("/:username", ensureLoggedIn, async function (req, res, next) {
     return next(err);
   }
 });
-
 
 /** PATCH /[username] { user } => { user }
  *
@@ -117,6 +134,8 @@ router.delete("/:username", ensureLoggedIn, async function (req, res, next) {
     return next(err);
   }
 });
+
+
 
 
 module.exports = router;

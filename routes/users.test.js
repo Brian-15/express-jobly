@@ -126,6 +126,42 @@ describe("POST /users", function () {
   });
 });
 
+describe("POST /users/:username/jobs/:id", function () {
+
+  test("works with admin", async function () {
+    const jobRes = await db.query(
+      `SELECT id FROM jobs WHERE title='j1'`);
+    const { id } = jobRes.rows[0];
+    console.log(id);
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${id}`)
+      .set("authorization", `Bearer ${adminToken}`);
+    // expect(resp.statusCode).toBe(201);
+    expect(resp.body).toEqual({ applied: id });
+  });
+
+  test("works with user logged in applying for themselves", async function () {
+    const jobRes = await db.query(
+      `SELECT id FROM jobs WHERE title='j1'`);
+    const { id } = jobRes.rows[0];
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${id}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    // expect(resp.statusCode).toBe(201);
+    expect(resp.body).toEqual({ applied: id });
+  });
+
+  test("fails: unauth for anon", async function () {
+    const jobRes = await db.query(
+      `SELECT id FROM jobs WHERE title='j1'`);
+    const { id } = jobRes.rows[0];
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${id}`);
+    expect(resp.statusCode).toBe(401);
+    expect(resp.body).toEqual({ error: { message: "Unauthorized", status: 401 } });
+  });
+});
+
 /************************************** GET /users */
 
 describe("GET /users", function () {
