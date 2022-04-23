@@ -1,15 +1,14 @@
 const { BadRequestError } = require("../expressError");
 
-// THIS NEEDS SOME GREAT DOCUMENTATION.
 /** 
  * format data and column names for SQL UPDATE clause
- * @param {*} dataToUpdate Object containing data to update
- * @param {*} jsToSql Object containing column names in camelCase and values in snake_case: { colName: col_name }
- * @returns object containing:
+ * @param {object} dataToUpdate Object containing data to update
+ * @param {object} jsToSql Object containing column names in camelCase and values in snake_case.
+ * e.g.: { colName: col_name }
+ * @yields { setCols: string, values: array } where:
  *  - setCols: a string of comma-separated column names and value indices ($1, $2, etc.)
  *  - values: array of values t
  */
-
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);
   if (keys.length === 0) throw new BadRequestError("No data");
@@ -25,11 +24,25 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
+/**
+ * Generates partial SQL query string for filtering data from the companies table.
+ * If no filters are provided, return empty string.
+ * @param {Object} [filters] - company filters
+ * @param {string} [filters.nameLike]
+ * @param {number} [filters.minEmployees]
+ * @param {number} [filters.maxEmployees]
+ * @yields string containing part of SQL query starting at WHERE keyword
+ */
 function sqlForCompanyFilters(filters) {
   if (!filters || Object.keys(filters).length === 0) return "";
   
   const { nameLike, maxEmployees, minEmployees } = filters;
   const filterStrings = [];
+
+  // handle corner case
+  if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
+    throw new BadRequestError();
+  }
 
   if (nameLike) {
     filterStrings.push(`name ILIKE '%${nameLike}%'`);
@@ -46,6 +59,16 @@ function sqlForCompanyFilters(filters) {
   return ` WHERE ${filterStrings.join(" AND ")} `;
 }
 
+/**
+ * Generates partial SQL query string for filtering data from the jobs table.
+ * If no filters are provided, return empty string.
+ * @param {object} [filters] - job filters
+ * @param {string} [filters.title]
+ * @param {number} [filters.minSalary]
+ * @param {boolean} [filters.hasEquity]
+ * 
+ * @yields string containing SQL query starting at WHERE
+ */
 function sqlForJobFilters(filters) {
   if (!filters || Object.keys(filters).length === 0) return "";
   
